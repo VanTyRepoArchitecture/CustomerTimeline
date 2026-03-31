@@ -1,0 +1,1085 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/product.schema.json",
+  "title": "Customer timeline schema",
+  "description": "Customer timeline schema",
+  "type": "object",
+  "$defs": {
+    "emailOrPhoneValidity": {
+      "type": "string",
+      "enum": [ "Valid", "NotValid", "WithSyntaxError" ],
+      "description": "Validité de l'information.",
+      "x-enumDescriptions": {
+        "Valid": "Valide",
+        "NotValid": "Non invalide",
+        "WithSyntaxError": "Avec erreur de syntaxe"
+      }
+    },
+    "companyPhoneNumberType": {
+      "type": "string",
+      "enum": [ "Phone1", "Phone2", "Fax" ],
+      "description": "Type de numéro de téléphone Entreprise.",
+      "x-enumDescriptions": {
+        "Phone1": "Téléphone n°1 entreprise",
+        "Phone2": "Téléphone n°2 entreprise",
+        "Fax": "Fax entreprise"
+      }
+    },
+    "identifier": {
+      "type": "object",
+      "description": "Identifiants d'une entité",
+      "properties": {
+        "externalReference": {
+          "type": "string",
+          "maxLength": 40,
+          "pattern": "\\S",
+          "description": "Optional. Référence externe",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "ET_REFEXTERNE, T_REFEXTERNE"
+          }
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 35,
+          "pattern": "\\S",
+          "description": "Optional. Identifiant interne."
+        }
+      }
+    },
+    "individualPhoneNumberType": {
+      "type": "string",
+      "enum": [ "Home", "Cellular", "Office" ],
+      "description": "Type de numéro de téléphone Particulier.",
+      "x-enumDescriptions": {
+        "Home": "Téléphone domicile",
+        "Cellular": "Téléphone portable",
+        "Office": "Téléphone bureau"
+      }
+    },
+    "userFieldProperties": {
+      "type": "object",
+      "description": "Données d'un champ utilisateur.",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Identifiant du champ utilisateur.",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "MUD_IDCHAMP"
+          }
+        },
+        "value": {
+          "type": "object",
+          "description": "Valeur du champ utilisateur. Seule la propriété correspondant au type doit être renseignée.",
+          "properties": {
+            "boolean": {
+              "type": "boolean",
+              "description": "Optional. Valeur du champ utilisateur booléen qui peut être renseignée si ValueType=Boolean.",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "MUD_VALCHAMP"
+              }
+            },
+            "date": {
+              "type": "string",
+              "format": "date",
+              "description": "Optional. Valeur du champ utilisateur date qui peut être renseignée si ValueType=Date.",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "MUD_VALCHAMP"
+              }
+            },
+            "listElement": {
+              "type": "string",
+              "maxLength": 70,
+              "pattern": "\\S",
+              "description": "Optional. Liste de valeurs texte du champ utilisateur liste qui peut être renseignée si ValueType=SelectionList. La valeur doit appartenir à la liste des valeurs possibles paramétrées.",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "MUD_VALCHAMP"
+              }
+            },
+            "number": {
+              "type": "number",
+              "description": "Optional. Valeur du champ utilisateur décimal qui peut être renseignée si ValueType=Numerical. La valeur doit respecter les contraintes paramétrées, notamment le nombre maximum de chiffres de la partie entière et le nombre de décimales.",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "MUD_VALCHAMP"
+              }
+            },
+            "text": {
+              "type": "string",
+              "maxLength": 70,
+              "pattern": "\\S",
+              "description": "Optional. Valeur du champ utilisateur chaîne de caractères qui peut être renseignée si ValueType=CaracterString. La valeur doit respecter les contraintes paramétrées, notamment la taille minimum et la taille maximum.",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "MUD_VALCHAMP"
+              }
+            }
+          }
+        },
+        "valueType": {
+          "type": "string",
+          "enum": [ "Boolean", "CaracterString", "Date", "SelectionList", "Numerical" ],
+          "description": "Type du champ utilisateur.",
+          "x-enumDescriptions": {
+            "Boolean": "Booléen",
+            "CaracterString": "Chaîne",
+            "Date": "Date",
+            "SelectionList": "Liste de choix",
+            "Numerical": "Numérique"
+          },
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "MUC_TYPESAISIE"
+          }
+        }
+      },
+      "required": [ "id", "value", "valueType" ]
+    }
+  },
+  "properties": {
+    "address": {
+      "type": "object",
+      "description": "Optional. Champs adresse principale du client",
+      "properties": {
+        "city": {
+          "type": "string",
+          "maxLength": 70,
+          "pattern": "\\S",
+          "description": "Ville",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_VILLE"
+          }
+        },
+        "countryId": {
+          "type": "string",
+          "maxLength": 3,
+          "pattern": "\\S",
+          "description": "Identifiant du pays",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_PAYS"
+          }
+        },
+        "lines": {
+          "type": "array",
+          "maxItems": 4,
+          "minItems": 1,
+          "description": "Optional. Lignes d'adresse du client. Le numéro et la valeur doivent être renseignés.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4,
+                "description": "Numéro de la ligne"
+              },
+              "value": {
+                "type": "string",
+                "maxLength": 70,
+                "pattern": "\\S",
+                "description": "Ligne d'adresse",
+                "x-source": {
+                  "database": "Y2",
+                  "fieldName": "T_ADRESSEx"
+                }
+              }
+            }
+          }
+        },
+        "notAtThisAddress": {
+          "type": "boolean",
+          "description": "Vrai si le client n'utilise plus cette adresse",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_NPAI"
+          }
+        },
+        "optinPostal": {
+          "type": "string",
+          "enum": [ "AskCustomer", "UsableByBrand", "UsableByPartners", "Unusable" ],
+          "description": "Confidentialité adresse postale",
+          "x-enumDescriptions": {
+            "AskCustomer": "Information à demander au client",
+            "UsableByBrand": "Information utilisable par l'enseigne uniquement",
+            "UsableByPartners": "Information utilisable par les partenaires",
+            "Unusable": "Information à ne pas utiliser"
+          },
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "YTC_INFOADRESSE"
+          }
+        },
+        "regionId": {
+          "type": "string",
+          "maxLength": 9,
+          "pattern": "\\S",
+          "description": "Optional. Identifiant de la région",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_REGION"
+          },
+          "zipCode": {
+            "type": "string",
+            "maxLength": 10,
+            "pattern": "\\S",
+            "description": "Optional. Identifiant du code postal de la ville",
+            "x-source": {
+              "database": "Y2",
+              "fieldName": "T_CODEPOSTAL"
+            },
+            "required": [ "countryId", "notAtThisAddress", "optinPostal", "optinPostal" ]
+          }
+        }
+      }
+    },
+    "closed": {
+      "type": "boolean",
+      "description": "Client fermé",
+      "x-source": {
+        "database": "Y2",
+        "fieldName": "T_FERME"
+      }
+    },
+    "company": {
+      "type": "object",
+      "description": "Optional. Champs concernant le client de type Entreprise. La présence de Company implique qu'il s'agit d'une entreprise. Individual et Company ne peuvent pas être présents tous les deux.",
+      "properties": {
+        "additionalName": {
+          "type": "string",
+          "maxLength": 35,
+          "pattern": "\\S",
+          "description": "Optional. Complément de la raison sociale",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_PRENOM"
+          }
+        },
+        "alternateName": {
+          "type": "string",
+          "maxLength": 35,
+          "pattern": "\\S",
+          "description": "Optional. Autre nom de la société.",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_NOM2"
+          }
+        },
+        "communication": {
+          "type": "object",
+          "description": "Optional. Champs concernant la communication avec l'entreprise et la confidentialité de ces informations.",
+          "properties": {
+            "email": {
+              "type": "object",
+              "description": "Optional. Informations sur l'Email du client.",
+              "properties": {
+                "optin": {
+                  "type": "string",
+                  "enum": [ "AskCustomer", "UsableByBrand", "UsableByPartners", "Unusable" ],
+                  "description": " Information de confidentialité de l'Email.",
+                  "x-enumDescriptions": {
+                    "AskCustomer": "Information à demander au client",
+                    "UsableByBrand": "Information utilisable par l'enseigne uniquement",
+                    "UsableByPartners": "Information utilisable par les partenaires",
+                    "Unusable": "Information à ne pas utiliser"
+                  },
+                  "x-source": {
+                    "database": "Y2",
+                    "fieldName": "YTC_INFOEMAIL1"
+                  }
+                },
+                "validity": {
+                  "$ref": "#/$defs/emailOrPhoneValidity",
+                  "description": "Validité de l'Email.",
+                  "x-source": {
+                    "database": "Y2",
+                    "fieldName": "YTC_EMAIL1VALIDE, YTC_EMAIL1SYNHS"
+                  }
+                },
+                "value": {
+                  "type": "string",
+                  "maxLength": 250,
+                  "pattern": "\\S",
+                  "description": "Valeur de l'Email.",
+                  "x-source": {
+                    "database": "Y2",
+                    "fieldName": "T_EMAIL"
+                  }
+                }
+              }
+            },
+            "emailRecovery": {
+              "type": "boolean",
+              "description": "Optional. Vrai si reprise des emails du client lors de l'envoi des documents. Information obligatoire si un Email est renseigné.",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "YTC_ENVTICKEMAIL"
+              }
+            },
+            "emailing": {
+              "type": "boolean",
+              "description": "Optional. Vrai si le client accepte de recevoir des mails. Information obligatoire si un Email est renseigné.",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "T_EMAILING"
+              }
+            },
+            "mailing": {
+              "type": "boolean",
+              "description": "Vrai si le client accepte le publipostage.",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "T_PUBLIPOSTAGE"
+              }
+            },
+            "phones": {
+              "type": "object",
+              "description": "Optional. Collection des numéros de téléphone du client. Le type et la valeur doivent être renseignés.",
+              "minItems": 1,
+              "maxItems": 3,
+              "properties": {
+                "optin": {
+                  "type": "string",
+                  "enum": [ "AskCustomer", "UsableByBrand", "UsableByPartners", "Unusable" ],
+                  "description": "Information de confidentialité du numéro de téléphone",
+                  "x-enumDescriptions": {
+                    "AskCustomer": "Information à demander au client",
+                    "UsableByBrand": "Information utilisable par l'enseigne uniquement",
+                    "UsableByPartners": "Information utilisable par les partenaires",
+                    "Unusable": "Information à ne pas utiliser"
+                  },
+                  "x-source": {
+                    "database": "Y2",
+                    "fieldName": "YTC_INFOTEL1, YTC_INFOTEL2, YTC_INFOTEL3"
+                  }
+                },
+                "type": {
+                  "$ref": "#/$defs/companyPhoneNumberType",
+                  "description": "Type de téléphone."
+                },
+                "validity": {
+                  "$ref": "#/$defs/emailOrPhoneValidity",
+                  "description": "Validité du numéro de téléphone.",
+                  "x-source": {
+                    "database": "Y2",
+                    "fieldName": "YTC_TEL1VALIDE, YTC_TEL2VALIDE, YTC_TEL3VALIDE, YTC_TEL1SYNHS, YTC_TEL2SYNHS, YTC_TEL3SYNHS"
+                  },
+                  "value": {
+                    "type": "string",
+                    "maxLength": 25,
+                    "pattern": "\\S",
+                    "description": "Numéro de téléphone.",
+                    "x-source": {
+                      "database": "Y2",
+                      "fieldName": "T_TELEPHONE, T_TELEX, T_FAX"
+                    }
+                  }
+                }
+              }
+            },
+            "webSite": {
+              "type": "string",
+              "maxLength": 250,
+              "pattern": "\\S",
+              "description": "Optional. Adresse du site Web du client.",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "T_TELEPHONE, T_TELEX, T_FAX"
+              }
+            }
+          },
+          "required": [ "mailing" ]
+        },
+        "legalFormId": {
+          "type": "string",
+          "maxLength": 3,
+          "pattern": "\\S",
+          "description": "Optional. Forme juridique de la société.",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_FORMEJURIDIQUE"
+          }
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 35,
+          "pattern": "\\S",
+          "description": "Raison sociale de la société.",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_LIBELLE"
+          }
+        }
+      },
+      "required": [ "name" ]
+    },
+    "creationStoreIdentifier": {
+      "$ref": "#/$defs/identifier",
+      "description": "Identifiants de l'établissement de création du client. Le contrôle d'existence de l'établissement est supposé déjà réalisé.",
+      "x-source": {
+        "database": "Y2",
+        "fieldName": "T_ETABCREATION, ET_REFEXTERNE"
+      }
+    },
+    "fictitious": {
+      "type": "boolean",
+      "description": "Vrai si le client est fictif (client de passage)",
+      "x-source": {
+        "database": "Y2",
+        "fieldName": "T_TIERSFICTIF"
+      }
+    },
+    "identification": {
+      "type": "object",
+      "description": "Codes ou identifications diverses du client",
+      "properties": {
+        "cpfCnpjCode": {
+          "type": "string",
+          "maxLength": 14,
+          "pattern": "\\S",
+          "description": "Optional. Code CPF/CNPJ pour le Brésil. Doit être unique pour chaque client. Pour un client particulier, le code CPF est attendu : il doit être composé de 11 chiffres. Pour un client entreprise, le code CNPJ est attendu : il doit être composé de 14 chiffres.",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "YTC_CODECPFCNPJ"
+          }
+        },
+        "eanCode": {
+          "type": "string",
+          "maxLength": 17,
+          "pattern": "\\S",
+          "description": "Optional. Autre code du client",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_EAN"
+          }
+        },
+        "fiscalId1": {
+          "type": "string",
+          "maxLength": 17,
+          "pattern": "\\S",
+          "description": "Optional. Numéro fiscal de référence (NIF)",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_NIF"
+          }
+        },
+        "fiscalId2": {
+          "type": "string",
+          "maxLength": 17,
+          "pattern": "\\S",
+          "description": "Optional. Numéro d'identification fiscale (SIRET)",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_SIRET"
+          }
+        },
+        "localFiscalId": {
+          "type": "string",
+          "maxLength": 16,
+          "pattern": "\\S",
+          "description": "Optional. Identifiant fiscal du client pour l'administration italienne",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "YTC_CODEFISCIT"
+          }
+        },
+        "municipalRegistration": {
+          "type": "string",
+          "maxLength": 18,
+          "pattern": "\\S",
+          "description": "Optional. Inscription municipale du client au Brésil. Géré uniquement pour les clients de type Entreprise. Doit être unique pour chaque client.",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "YTC_INSCMUNICIPALE"
+          }
+        },
+        "regionalRegistration": {
+          "type": "string",
+          "maxLength": 18,
+          "pattern": "\\S",
+          "description": "Optional. Inscription régionale du client au Brésil. Géré uniquement pour les clients de type Entreprise. Doit être unique pour chaque client.",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "YTC_INSCFEDERALE"
+          }
+        },
+        "shortName": {
+          "type": "string",
+          "maxLength": 17,
+          "pattern": "\\S",
+          "description": "Libellé abrégé",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_ABREGE"
+          }
+        }
+      },
+      "required": [ "shortName" ]
+    },
+    "identifier": {
+      "$ref": "#/$defs/identifier",
+      "description": "Optional. Identifiants du client à créer. L'identifiant du client peut être généré en automatique selon paramètrage.",
+      "x-source": {
+        "database": "Y2",
+        "fieldName": "T_TIERS, T_REFEXTERNE"
+      }
+    },
+    "individual": {
+      "type": "object",
+      "description": "Optional. Champs concernant le client Particulier. La présence de Individual implique qu'il s'agit d'un particulier. Individual et Company ne peuvent pas être présents tous les deux.",
+      "properties": {
+        "alternateFirstName": {
+          "type": "string",
+          "maxLength": 35,
+          "pattern": "\\S",
+          "description": "Optional. Second prénom",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_PRENOM2"
+          }
+        },
+        "alternateLastName": {
+          "type": "string",
+          "maxLength": 35,
+          "pattern": "\\S",
+          "description": "Optional. Second nom",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_NOM2"
+          }
+        },
+        "birthDate": {
+          "type": "object",
+          "description": "Optional. Date de naissance",
+          "properties": {
+            "day": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 31,
+              "description": "Optional. Jour de naissance",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "T_JOURNAISSANCE"
+              }
+            },
+            "month": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 12,
+              "description": "Optional. Mois de naissance",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "T_MOISNAISSANCE"
+              }
+            },
+            "year": {
+              "type": "integer",
+              "minimum": 1900,
+              "description": "Optional. Année de naissance",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "T_ANNEENAISSANCE"
+              }
+            }
+          }
+        },
+        "communication": {
+          "type": "object",
+          "description": "Optional. Champs concernant la communication avec le particulier et la confidentialité de ces informations.",
+          "properties": {
+            "emailRecovery": {
+              "type": "boolean",
+              "description": "Optional. Vrai si reprise des emails du client lors de l'envoi des documents. Information obligatoire si un Email est renseigné.",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "YTC_ENVTICKEMAIL"
+              }
+            },
+            "emailing": {
+              "type": "boolean",
+              "description": "Optional. Vrai si le client accepte de recevoir des mails. Information obligatoire si un Email est renseigné.",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "T_EMAILING"
+              }
+            },
+            "emails": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "description": "Optional. Collection des adresses mail du client. Le numéro et la valeur doivent être renseignés.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2,
+                    "description": "Numéro de l'Email"
+                  },
+                  "optin": {
+                    "type": "string",
+                    "enum": [ "AskCustomer", "UsableByBrand", "UsableByPartners", "Unusable" ],
+                    "description": "Information de confidentialité de l'Email",
+                    "x-enumDescriptions": {
+                      "AskCustomer": "Information à demander au client",
+                      "UsableByBrand": "Information utilisable par l'enseigne uniquement",
+                      "UsableByPartners": "Information utilisable par les partenaires",
+                      "Unusable": "Information à ne pas utiliser"
+                    },
+                    "x-source": {
+                      "database": "Y2",
+                      "fieldName": "YTC_INFOEMAIL1, YTC_INFOEMAIL2"
+                    }
+                  },
+                  "validity": {
+                    "$ref": "#/$defs/emailOrPhoneValidity",
+                    "description": "Validité de l'Email",
+                    "x-source": {
+                      "database": "Y2",
+                      "fieldName": "YTC_EMAIL1VALIDE, YTC_EMAIL2VALIDE, YTC_EMAIL1SYNHS, YTC_EMAIL2SYNHS"
+                    }
+                  },
+                  "value": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "pattern": "\\S",
+                    "format": "email",
+                    "description": "Valeur de l'Email",
+                    "x-source": {
+                      "database": "Y2",
+                      "fieldName": "T_EMAIL, T_EMAIL2"
+                    }
+                  }
+                },
+                "required": [ "id", "optin", "value" ]
+              }
+            },
+            "mailing": {
+              "type": "boolean",
+              "description": "Vrai si le client accepte le publipostage",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "T_PUBLIPOSTAGE"
+              }
+            },
+            "phones": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "description": "Optional. Collection des numéros de téléphone du client. Le type et la valeur doivent être renseignés.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "optin": {
+                    "type": "string",
+                    "enum": [ "AskCustomer", "UsableByBrand", "UsableByPartners", "Unusable" ],
+                    "description": "Information de confidentialité du numéro de téléphone",
+                    "x-enumDescriptions": {
+                      "AskCustomer": "Information à demander au client",
+                      "UsableByBrand": "Information utilisable par l'enseigne uniquement",
+                      "UsableByPartners": "Information utilisable par les partenaires",
+                      "Unusable": "Information à ne pas utiliser"
+                    },
+                    "x-source": {
+                      "database": "Y2",
+                      "fieldName": "YTC_INFOTEL1, YTC_INFOTEL2, YTC_INFOTEL3"
+                    }
+                  },
+                  "type": {
+                    "$ref": "#/$defs/individualPhoneNumberType",
+                    "description": "Type de téléphone"
+                  },
+                  "validity": {
+                    "$ref": "#/$defs/emailOrPhoneValidity",
+                    "description": "Validité du numéro de téléphone",
+                    "x-source": {
+                      "database": "Y2",
+                      "fieldName": "YTC_TEL1VALIDE, YTC_TEL2VALIDE, YTC_TEL3VALIDE, YTC_TEL1SYNHS, YTC_TEL2SYNHS, YTC_TEL3SYNHS"
+                    }
+                  },
+                  "value": {
+                    "type": "string",
+                    "maxLength": 25,
+                    "pattern": "\\S",
+                    "description": "Numéro de téléphone",
+                    "x-source": {
+                      "database": "Y2",
+                      "fieldName": "T_TELEPHONE, T_TELEX, T_FAX"
+                    }
+                  }
+                },
+                "required": [ "type", "value" ]
+              }
+            }
+          },
+          "required": [ "mailing" ]
+        },
+        "firstName": {
+          "type": "string",
+          "maxLength": 35,
+          "pattern": "\\S",
+          "description": "Optional. Prénom",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_PRENOM"
+          }
+        },
+        "gender": {
+          "type": "string",
+          "maxLength": 3,
+          "pattern": "\\S",
+          "description": "Optional. Sexe",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_SEXE"
+          }
+        },
+        "lastName": {
+          "type": "string",
+          "maxLength": 35,
+          "pattern": "\\S",
+          "description": "Nom du client",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_LIBELLE"
+          }
+        },
+        "titleId": {
+          "type": "string",
+          "maxLength": 3,
+          "pattern": "\\S",
+          "description": "Optional. Titre ou civilité du client",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_JURIDIQUE"
+          }
+        }
+      },
+      "required": [ "lastName" ]
+    },
+    "informations": {
+      "type": "object",
+      "description": "Informations générales du client",
+      "properties": {
+        "activityCode": {
+          "type": "string",
+          "maxLength": 5,
+          "pattern": "\\S",
+          "description": "Optional. Code de l'activité du client",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_APE"
+          }
+        },
+        "activitySectorId": {
+          "type": "string",
+          "maxLength": 3,
+          "pattern": "\\S",
+          "description": "Optional. Identifiant du secteur d'activité",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_SECTEUR"
+          }
+        },
+        "currencyId": {
+          "type": "string",
+          "maxLength": 3,
+          "pattern": "\\S",
+          "description": "Identifiant de la devise du client",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_DEVISE"
+          }
+        },
+        "deliveredCustomerIdentifier": {
+          "$ref": "#/$defs/identifier",
+          "description": "Optional. Identifiants du client à livrer associé au client. Si non renseigné, prend la valeur de l'identifiant du client en cours.",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "YTC_TIERSLIVRE, T_REFEXTERNE"
+          }
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 35,
+          "pattern": "\\S",
+          "description": "Optional. Commentaire",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_COMMENTAIRE"
+          }
+        },
+        "invoicedCustomerIdentifier": {
+          "$ref": "#/$defs/identifier",
+          "description": "Optional. Identifiants du client facturé associé au client. Si non renseigné, prend la valeur de l'identifiant du client en cours.",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_FACTURE, T_REFEXTERNE"
+          }
+        },
+        "payerCustomerIdentifier": {
+          "$ref": "#/$defs/identifier",
+          "description": "Optional. Identifiants du client payeur associé au client. Si non renseigné, prend la valeur de l'identifiant du client en cours.",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_PAYEUR, T_REFEXTERNE"
+          }
+        },
+        "taxSystemId": {
+          "type": "string",
+          "maxLength": 3,
+          "pattern": "\\S",
+          "description": "Régime de taxe",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_REGIMETVA"
+          }
+        },
+        "vatLiability": {
+          "type": "string",
+          "enum": [ "DebitsVat", "ReceiptsVat", "MixedVat", "None" ],
+          "description": "Optional. Exigibilité de la TVA. Pour information, la valeur n'est pas prise en compte dans Y2.",
+          "x-enumDescriptions": {
+            "DebitsVat": "TVA sur les débits",
+            "ReceiptsVat": "TVA sur les encaissements",
+            "MixedVat": "TVA mixte",
+            "None": ""
+          },
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "T_TVAENCAISSEMENT"
+          }
+        }
+      },
+      "required": [ "currencyId", "taxSystemId" ]
+    },
+    "languageId": {
+      "type": "string",
+      "maxLength": 3,
+      "pattern": "\\S",
+      "description": "Optional. Identifiant de la langue du client",
+      "x-source": {
+        "database": "Y2",
+        "fieldName": "T_LANGUE"
+      }
+    },
+    "nationalityId": {
+      "type": "string",
+      "maxLength": 3,
+      "pattern": "\\S",
+      "description": "Optional. Identifiant de la nationalité du client",
+      "x-source": {
+        "database": "Y2",
+        "fieldName": "T_NATIONALITE"
+      }
+    },
+    "prospect": {
+      "type": "boolean",
+      "description": "Vrai si le client est un prospect",
+      "x-source": {
+        "database": "Y2",
+        "fieldName": "T_NATUREAUXI"
+      }
+    },
+    "salespersons": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "description": "Optional. Liste des vendeurs",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 17,
+            "pattern": "\\S",
+            "description": "Identifiant du vendeur. Le contrôle d'existence du vendeur est supposé déjà réalisé.",
+            "x-source": {
+              "database": "Y2",
+              "fieldName": "T_REPRESENTANT, YTC_REPRESENTANT2, YTC_REPRESENTANT3"
+            }
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3,
+            "description": "Position du vendeur"
+          }
+        },
+        "required": [ "id", "rank" ]
+      }
+    },
+    "taxExcluded": {
+      "type": "boolean",
+      "description": "Vrai si facturation HT",
+      "x-source": {
+        "database": "Y2",
+        "fieldName": "T_FACTUREHT"
+      }
+    },
+    "userDefined": {
+      "type": "object",
+      "description": "Optional. Liste des champs libres de la fiche client",
+      "properties": {
+        "amounts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "description": "Optional. Champs libres Montants",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3,
+                "description": "Identifiant du montant libre"
+              },
+              "value": {
+                "type": "number",
+                "description": "Montant libre du client",
+                "x-source": {
+                  "database": "Y2",
+                  "fieldName": "YTC_VALLIBREx"
+                }
+              }
+            },
+            "required": [ "id", "value" ]
+          }
+        },
+        "dates": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "description": "Optional. Champs libres Dates",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3,
+                "description": "Identifiant de la date libre"
+              },
+              "value": {
+                "type": "string",
+                "format": "date",
+                "description": "Date libre du client",
+                "x-source": {
+                  "database": "Y2",
+                  "fieldName": "YTC_DATELIBREx"
+                }
+              }
+            },
+            "required": [ "id", "value" ]
+          }
+        },
+        "decisions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "description": "Optional. Champs libres Décisions",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3,
+                "description": "Identifiant de la décision libre"
+              },
+              "value": {
+                "type": "boolean",
+                "description": "Décision libre du client",
+                "x-source": {
+                  "database": "Y2",
+                  "fieldName": "YTC_BOOLLIBREx"
+                }
+              }
+            },
+            "required": [ "id", "value" ]
+          }
+        },
+        "tables": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "description": "Optional. Champs libres Tables",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10,
+                "description": "Identifiant de la table libre"
+              },
+              "value": {
+                "type": "string",
+                "maxLength": 6,
+                "description": "Table libre du client",
+                "x-source": {
+                  "database": "Y2",
+                  "fieldName": "YTC_TABLELIBRETIERSx"
+                }
+              }
+            },
+            "required": [ "id", "value" ]
+          }
+        },
+        "texts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "description": "Optional. Champs libres Textes",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3,
+                "description": "Identifiant du texte libre"
+              },
+              "value": {
+                "type": "string",
+                "maxLength": 35,
+                "description": "Texte libre du client",
+                "x-source": {
+                  "database": "Y2",
+                  "fieldName": "YTC_TEXTELIBREx"
+                }
+              }
+            },
+            "required": [ "id", "value" ]
+          }
+        }
+      }
+    },
+    "userFields": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "description": "Optional. Collection des champs utilisateur. Chaque champ utilisateur donné est inséré dans la table des champs utilisateur du client.",
+      "items": {
+        "$ref": "#/$defs/userFieldProperties"
+      }
+    },
+    "usualStoreIdentifier": {
+      "$ref": "#/$defs/identifier",
+      "description": "Identifiants de l'établissement de rattachement du client. Le contrôle d'existence de l'établissement est supposé déjà réalisé.",
+      "x-source": {
+        "database": "Y2",
+        "fieldName": "T_ETABLISSEMENT, ET_REFEXTERNE"
+      }
+    },
+    "required": [ "closed", "usualStoreIdentifier" ]
+  }
+}
