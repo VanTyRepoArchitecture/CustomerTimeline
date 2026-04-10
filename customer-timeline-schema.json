@@ -1080,6 +1080,10 @@
         "fieldName": "T_ETABLISSEMENT, ET_REFEXTERNE"
       }
     },
+    "receipts": {
+      "type": "array",
+      "description": "Optional. Liste des tickets. Voir la définition dans le receipt.json"
+    },
     "required": [ "closed", "usualStoreIdentifier" ]
   }
 }
