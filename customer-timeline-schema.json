@@ -1084,6 +1084,48 @@
       "type": "array",
       "description": "Optional. Liste des tickets. Voir la définition dans le receipt.json"
     },
+    "loyalty": {
+      "type": "object",
+      "description": "Optional. Informations de fidélité du client.",
+      "properties": {
+        "cardNumber": {
+          "type": "string",
+          "maxLength": 17,
+          "pattern": "\\S",
+          "description": "Numéro de carte de fidélité.",
+          "x-source": {
+            "database": "Y2",
+            "fieldName": "MFC_NUMCARTE"
+          }
+        },
+        "program": {
+          "type": "object",
+          "description": "Programme de fidélité associé au client.",
+          "properties": {
+            "code": {
+              "type": "string",
+              "maxLength": 6,
+              "pattern": "\\S",
+              "description": "Code du programme de fidélité.",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "MFP_CODE"
+              }
+            },
+            "libelle": {
+              "type": "string",
+              "maxLength": 35,
+              "pattern": "\\S",
+              "description": "Libellé du programme de fidélité.",
+              "x-source": {
+                "database": "Y2",
+                "fieldName": "MFP_LIBELLE"
+              }
+            }
+          }
+        }
+      }
+    },
     "required": [ "closed", "usualStoreIdentifier" ]
   }
 }
